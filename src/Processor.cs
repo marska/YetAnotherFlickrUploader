@@ -345,6 +345,50 @@ namespace YetAnotherFlickrUploader
       return formatted;
     }
 
+    public static bool FlickrAuthenticate()
+    {
+      Logger.Debug("Authenticating...");
+
+      var token = Authenticate();
+
+      if (token == null)
+      {
+        Logger.Error("Could not authenticate.");
+        return true;
+      }
+
+      Logger.Info("Authenticated as " + token.FullName + ".");
+
+      Uploader.UserId = token.UserId;
+      Uploader.Flickr = FlickrManager.GetAuthInstance();
+      return false;
+    }
+
+    static OAuthAccessToken Authenticate()
+    {
+      OAuthAccessToken token = FlickrManager.OAuthToken;
+
+      if (token == null || token.Token == null)
+      {
+        ConsoleHelper.WriteInfoLine("Requesting access token...");
+
+        Flickr flickr = FlickrManager.GetInstance();
+        OAuthRequestToken requestToken = flickr.OAuthGetRequestToken("oob");
+
+        string url = flickr.OAuthCalculateAuthorizationUrl(requestToken.Token, AuthLevel.Write);
+
+        Process.Start(url);
+
+        ConsoleHelper.WriteInfo("Verifier: ");
+        string verifier = Console.ReadLine();
+
+        token = flickr.OAuthGetAccessToken(requestToken, verifier);
+        FlickrManager.OAuthToken = token;
+      }
+
+      return token;
+    }
+
     private static List<string> FindPictureFiles(string directory)
     {
       return Directory.EnumerateFiles(directory)

@@ -12,7 +12,7 @@ using FlickrNet;
 
 namespace YetAnotherFlickrUploader
 {
-	class Program
+	public class Program
 	{
 		static ModesEnum _mode;
 
@@ -49,24 +49,10 @@ namespace YetAnotherFlickrUploader
 
 			#endregion
 
-			#region Authenticate with Flickr API
-
-			Logger.Debug("Authenticating...");
-
-			var token = Authenticate();
-
-			if (token == null)
-			{
-				Logger.Error("Could not authenticate.");
-				return;
-			}
-
-			Logger.Info("Authenticated as " + token.FullName + ".");
-
-			Uploader.UserId = token.UserId;
-			Uploader.Flickr = FlickrManager.GetAuthInstance();
-
-			#endregion
+		  if (Processor.FlickrAuthenticate())
+		  {
+		    return;
+		  }
 
 			try
 			{
@@ -77,31 +63,6 @@ namespace YetAnotherFlickrUploader
 				Console.WriteLine();
 				Logger.Error("Upload failed.", e);
 			}
-		}
-
-		static OAuthAccessToken Authenticate()
-		{
-			OAuthAccessToken token = FlickrManager.OAuthToken;
-
-			if (token == null || token.Token == null)
-			{
-				ConsoleHelper.WriteInfoLine("Requesting access token...");
-
-				Flickr flickr = FlickrManager.GetInstance();
-				OAuthRequestToken requestToken = flickr.OAuthGetRequestToken("oob");
-
-				string url = flickr.OAuthCalculateAuthorizationUrl(requestToken.Token, AuthLevel.Write);
-
-				Process.Start(url);
-
-				ConsoleHelper.WriteInfo("Verifier: ");
-				string verifier = Console.ReadLine();
-
-				token = flickr.OAuthGetAccessToken(requestToken, verifier);
-				FlickrManager.OAuthToken = token;
-			}
-
-			return token;
 		}
 	}
 }
