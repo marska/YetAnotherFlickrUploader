@@ -1,0 +1,13 @@
+version: 1.0.{build}
+os: Visual Studio 2015
+configuration: Release
+before_build:
+  - nuget restore src\YetAnotherFlickrUploader.sln
+build:
+  project: src\YetAnotherFlickrUploader.sln
+  verbosity: minimal
+artifacts:
+  - path: bin
+    name: YetAnotherFlickrUploader
+    type: zip
+test: off
