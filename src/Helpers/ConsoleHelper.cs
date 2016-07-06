@@ -5,9 +5,12 @@ namespace YetAnotherFlickrUploader.Helpers
 {
 	public static class ConsoleHelper
 	{
-		#region Console.Write variants
+    private static int? _cursorPosY;
+    private static int? _cursorPosX;
 
-		public static void WriteDebug(string message)
+    #region Console.Write variants
+
+    public static void WriteDebug(string message)
 		{
 			Write(ConsoleColor.Gray, message);
 		}
@@ -130,9 +133,28 @@ namespace YetAnotherFlickrUploader.Helpers
 			return ("y" == answer.ToLower());
 		}
 
-		#region Private methods
+    public static void SaveCursorPosition()
+    {
+      _cursorPosY = Console.CursorTop;
+      _cursorPosX = Console.CursorLeft;
+    }
 
-		private static void Write(ConsoleColor color, string message)
+    public static void RestoreCursorPosition()
+    {
+      SetCursorPosition(_cursorPosX, _cursorPosY);
+    }
+
+    public static void SetCursorPosition(int? left, int? top = null)
+    {
+      if (top.HasValue)
+        Console.CursorTop = top.Value;
+      if (left.HasValue)
+        Console.CursorLeft = left.Value;
+    }
+
+    #region Private methods
+
+    private static void Write(ConsoleColor color, string message)
 		{
 			var fc = Console.ForegroundColor;
 			Console.ForegroundColor = color;

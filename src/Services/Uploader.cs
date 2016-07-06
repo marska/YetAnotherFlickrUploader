@@ -56,7 +56,7 @@ namespace YetAnotherFlickrUploader.Services
 
 		public static Photoset CreatePhotoSet(string title, string coverPhotoId)
 		{
-			var f = FlickrManager.GetAuthInstance();
+			var f = FlickrService.GetAuthInstance();
 			var photoset = TryExecute(
 				() => f.PhotosetsCreate(title, coverPhotoId),
 				() => FindPhotosetByName(title)

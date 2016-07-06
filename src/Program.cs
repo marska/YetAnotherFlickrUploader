@@ -6,7 +6,7 @@ namespace YetAnotherFlickrUploader
 {
   public class Program
   {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
       var options = new Options();
 
@@ -21,7 +21,8 @@ namespace YetAnotherFlickrUploader
       {
         p.Parse(args);
 
-        Processor.Start(options);
+        IProcessor processor = new Processor();
+        processor.Start(options);
       }
       catch (Exception e)
       {
