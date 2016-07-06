@@ -58,7 +58,6 @@
   <ItemGroup>
     <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="Helpers\Logger.cs" />
-    <Compile Include="Helpers\Options.cs" />
     <Compile Include="Processor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,6 +68,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Services\Uploader.cs" />
+    <Compile Include="Options.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

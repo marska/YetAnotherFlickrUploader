@@ -1,68 +1,35 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using NDesk.Options;
 using YetAnotherFlickrUploader.Helpers;
-using YetAnotherFlickrUploader.Services;
-using FlickrNet;
 
 namespace YetAnotherFlickrUploader
 {
-	public class Program
-	{
-		static ModesEnum _mode;
+  public class Program
+  {
+    static void Main(string[] args)
+    {
+      var options = new Options();
 
-		static void Main(string[] args)
-		{
-			#region Parse args
+      var p = new OptionSet
+      {
+        { "p|path", v => options.Path = v },
+        { "a|family", v => options.ShareWithFamily = v != null },
+        { "r|friends", v => options.ShareWithFriends = v != null }
+      };
 
-			string path = null;
-			string modeSwitch = null;
+      try
+      {
+        p.Parse(args);
 
-			if (args != null)
-			{
-				int i = 0;
-				while (i < args.Length)
-				{
-					string arg = args[i++];
-					if (arg.StartsWith("--"))
-					{
-						modeSwitch = arg;
-					}
-					else
-					{
-						path = arg;
-					}
-				}
-			}
+        Processor.Start(options);
+      }
+      catch (Exception e)
+      {
+        Logger.Error("Something went wrong... :(", e);
+        Environment.Exit(-1);
+      }
 
-			if (string.IsNullOrEmpty(path))
-			{
-				path = Environment.CurrentDirectory;
-			}
-
-			_mode = Options.GetModeFromArgs(modeSwitch);
-
-			#endregion
-
-		  if (Processor.FlickrAuthenticate())
-		  {
-		    return;
-		  }
-
-			try
-			{
-        Processor.Start(path, _mode);
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine();
-				Logger.Error("Upload failed.", e);
-			}
-		}
-	}
+      Environment.Exit(0);
+    }
+  }
 }

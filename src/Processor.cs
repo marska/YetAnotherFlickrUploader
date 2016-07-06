@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using YetAnotherFlickrUploader.Helpers;
 using YetAnotherFlickrUploader.Services;
 using FlickrNet;
+using YetAnotherFlickrUploader.Properties;
 
 namespace YetAnotherFlickrUploader
 {
@@ -20,39 +21,38 @@ namespace YetAnotherFlickrUploader
     static readonly int BatchSizeForParallelUpload = Convert.ToInt32(ConfigurationManager.AppSettings["BatchSizeForParallelUpload"]);
     static readonly int BatchSizeForParallelProcessing = Convert.ToInt32(ConfigurationManager.AppSettings["BatchSizeForParallelProcessing"]);
 
-    public static void Start(string path, ModesEnum mode)
+    internal static void Start(Options options)
     {
+      if (FlickrAuthenticate())
+      {
+        return;
+      }
 
-      if (!Directory.Exists(path))
+      if (!Directory.Exists(options.Path))
       {
         Logger.Error("The specified path is invalid.");
         return;
       }
 
-      var files = FindPictureFiles(path);
+      var files = FindPictureFiles(options.Path);
 
       if (!files.Any())
       {
-        Logger.Warning("Could not locate any files to upload in the directory: {0}.", path);
+        Logger.Warning("Could not locate any files to upload in the directory: {0}.", options.Path);
 
-        if (mode == ModesEnum.Upload)
-        {
-          return;
-        }
-      }
-      else
-      {
-        Logger.Debug("Processing files in the directory: {0}.", path);
+        return;
       }
 
-      string photosetName = Path.GetFileName(path.TrimEnd('\\')); //GetPhotosetTitle(files.First());
+      Logger.Debug("Processing files in the directory: {0}.", options.Path);
+
+      string photosetName = Path.GetFileName(options.Path.TrimEnd('\\'));
 
       var photoset = Uploader.FindPhotosetByName(photosetName);
-      bool photosetExists = photoset != null && photoset.Title == photosetName;
-      bool photosetChanged = false;
+      var photosetExists = photoset != null && photoset.Title == photosetName;
+      var photosetChanged = false;
       string photosetId = null;
 
-      List<Photo> photosetPhotos = photosetExists
+      var photosetPhotos = photosetExists
         ? Uploader.GetPhotosetPictures(photoset.PhotosetId)
         : new List<Photo>();
 
@@ -72,7 +72,7 @@ namespace YetAnotherFlickrUploader
       }
       else
       {
-        if (ConsoleHelper.ConfirmYesNo(string.Format("Agree to upload {0} files to {1} photoset '{2}'?", files.Count, photosetExists ? "the existing" : "a new", photosetName)))
+        if (ConsoleHelper.ConfirmYesNo($"Agree to upload {files.Count} files to {(photosetExists ? "the existing" : "a new")} photoset '{photosetName}'?"))
         {
           photosetChanged = true;
 
@@ -167,55 +167,41 @@ namespace YetAnotherFlickrUploader
         }
       }
 
-      bool updatePermissions = mode == ModesEnum.ShareWithFamily || mode == ModesEnum.ShareWithFriends;
+      bool updatePermissions = options.ShareWithFamily || options.ShareWithFriends;
 
       if (photosetExists && (photosetChanged || updatePermissions))
       {
         // Get all photos in the photoset
         photosetPhotos = Uploader.GetPhotosetPictures(photosetId);
 
-        #region Validate photos in the photoset
-
-        ValidateDirectory(path, photosetPhotos);
-
-        #endregion
+        ValidateDirectory(options.Path, photosetPhotos);
 
         if (photosetPhotos.Count > 1)
         {
-          #region Sort photos in the photoset
-
           if (photosetChanged)
           {
             SortPhotosInSet(photosetPhotos);
           }
 
-          #endregion
-
-          #region Set permissions
-
           if (updatePermissions)
           {
-            SetPermissions(photosetPhotos, mode == ModesEnum.ShareWithFamily, mode == ModesEnum.ShareWithFriends);
+            SetPermissions(photosetPhotos, options.ShareWithFamily, options.ShareWithFriends);
           }
-
-          #endregion
         }
       }
     }
 
+    // todo: change to regex from settings (more flexible)
     private static string GetPhotoTitle(string path)
     {
-      string photosetName = GetPhotosetTitle(path);
-      string fileName = Path.GetFileNameWithoutExtension(path);
-      return string.Format("{0} - {1}", photosetName, fileName);
+      return Path.GetFileNameWithoutExtension(path);
     }
 
     private static void ValidateDirectory(string directory, IEnumerable<Photo> photosetPhotos)
     {
-      // Rescan the directory
-      List<string> files = FindPictureFiles(directory);
+      var files = FindPictureFiles(directory);
 
-      List<string> photosetPhotoTitles = photosetPhotos.Select(p => p.Title).ToList();
+      var photosetPhotoTitles = photosetPhotos.Select(p => p.Title).ToList();
 
       // Find files which were not uploaded to the photoset
       var leftFiles = files.Select(GetPhotoTitle).Where(x => !photosetPhotoTitles.Contains(x)).ToList();
@@ -302,10 +288,10 @@ namespace YetAnotherFlickrUploader
       }
     }
 
-    private static string GetPhotosetTitle(string path)
-    {
-      return Path.GetFileName(Path.GetDirectoryName(path));
-    }
+    //private static string GetPhotosetTitle(string path)
+    //{
+    //  return Path.GetFileName(Path.GetDirectoryName(path));
+    //}
 
 
     private static string TimeSpanToReadableString(TimeSpan span)
