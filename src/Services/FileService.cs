@@ -12,7 +12,9 @@ namespace YetAnotherFlickrUploader.Services
     public static List<string> FindPictureFiles(string directory)
     {
       return Directory.EnumerateFiles(directory)
-        .Where(file => file.ToLower().EndsWith("jpg") || file.ToLower().EndsWith("jpeg"))
+        .Where(file => file.ToLower().EndsWith("jpg") 
+                    || file.ToLower().EndsWith("jpeg")
+                    || file.ToLower().EndsWith("mov"))
         .ToList();
     }
 
