@@ -71,11 +71,11 @@ namespace YetAnotherFlickrUploader.Services
 		public static List<Photo> GetPhotosetPictures(string photosetId)
 		{
 			var photos = new List<Photo>();
-			// Get photoset size from its properties
+
 			Photoset photoset = Flickr.PhotosetsGetInfo(photosetId);
-			// Get photos page by page
+			
 			int pageNumber = 0;
-			const int photosPerPage = 500; // Max. allowed value
+			const int photosPerPage = 500;
 			while (pageNumber*photosPerPage < photoset.NumberOfPhotos)
 			{
 				var page = Flickr.PhotosetsGetPhotos(photosetId,

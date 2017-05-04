@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 
 namespace YetAnotherFlickrUploader.Helpers
 {
@@ -7,8 +6,6 @@ namespace YetAnotherFlickrUploader.Helpers
     {
         private static int? _cursorPosY;
         private static int? _cursorPosX;
-
-        #region Console.Write variants
 
         public static void WriteDebug(string message)
         {
@@ -24,35 +21,6 @@ namespace YetAnotherFlickrUploader.Helpers
         {
             Write(ConsoleColor.White, message);
         }
-
-        public static void WriteInfo(string format, params object[] args)
-        {
-            Write(ConsoleColor.White, format, args);
-        }
-
-        public static void WriteWarning(string message)
-        {
-            Write(ConsoleColor.DarkYellow, message);
-        }
-
-        public static void WriteWarning(string format, params object[] args)
-        {
-            Write(ConsoleColor.DarkYellow, format, args);
-        }
-
-        public static void WriteError(string message)
-        {
-            Write(ConsoleColor.Red, message);
-        }
-
-        public static void WriteError(string format, params object[] args)
-        {
-            Write(ConsoleColor.Red, format, args);
-        }
-
-        #endregion
-
-        #region Console.WriteLine variants
 
         public static void WriteDebugLine(string message)
         {
@@ -94,8 +62,6 @@ namespace YetAnotherFlickrUploader.Helpers
             WriteLine(ConsoleColor.Red, format, args);
         }
 
-        #endregion
-
         public static void WriteException(Exception e)
         {
             var fc = Console.ForegroundColor;
@@ -117,20 +83,6 @@ namespace YetAnotherFlickrUploader.Helpers
                 Console.WriteLine(e.StackTrace);
             }
             Console.ForegroundColor = fc;
-        }
-
-        public static bool ConfirmYesNo(string question)
-        {
-            WriteInfoLine(question);
-            WriteInfo("Yes/No: ");
-            var fc = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.White;
-            //var answer = Console.ReadKey();
-            var answer = Console.ReadLine();
-            Console.ForegroundColor = fc;
-            //Console.WriteLine();
-            //return ("y" == answer.KeyChar.ToString(CultureInfo.InvariantCulture).ToLower());
-            return ("y" == answer.ToLower());
         }
 
         public static void SaveCursorPosition()

@@ -24,8 +24,9 @@ namespace YetAnotherFlickrUploader.Services
 
       var photosetPhotoTitles = photosetPhotos.Select(p => p.Title).ToList();
 
-      // Find files which were not uploaded to the photoset
+
       var leftFiles = files.Select(Path.GetFileNameWithoutExtension).Where(x => !photosetPhotoTitles.Contains(x)).ToList();
+
       if (leftFiles.Any())
       {
         Console.WriteLine();
