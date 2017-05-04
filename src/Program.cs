@@ -1,5 +1,4 @@
 ﻿using System;
-using NDesk.Options;
 using YetAnotherFlickrUploader.Helpers;
 
 namespace YetAnotherFlickrUploader
@@ -10,19 +9,15 @@ namespace YetAnotherFlickrUploader
     {
       var options = new Options();
 
-      var p = new OptionSet
-      {
-        { "p|path", v => options.Path = v },
-        { "a|family", v => options.ShareWithFamily = v != null },
-        { "r|friends", v => options.ShareWithFriends = v != null }
-      };
-
       try
       {
-        p.Parse(args);
+        if (CommandLine.Parser.Default.ParseArguments(args, options))
+        {
+          IProcessor processor = new Processor();
+          processor.Start(options);
+        }
 
-        IProcessor processor = new Processor();
-        processor.Start(options);
+        Logger.Error("Wrong params. :(");
       }
       catch (Exception e)
       {

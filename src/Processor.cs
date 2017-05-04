@@ -34,18 +34,36 @@ namespace YetAnotherFlickrUploader
         return;
       }
 
-      var files = FileService.FindPictureFiles(options.Path);
+      var subDirectories = Directory.GetDirectories(options.Path);
+
+      if (subDirectories.Length > 0)
+      {
+        foreach (var subDirectory in subDirectories)
+        {
+          Process(subDirectory, options);
+        }
+      }
+      else
+      {
+        Process(options.Path, options);
+      }
+    }
+
+    private void Process(string path, Options options)
+    {
+      var files = FileService.FindPictureFiles(path);
 
       if (!files.Any())
       {
-        Logger.Warning("Could not locate any files to upload in the directory: {0}.", options.Path);
+        Logger.Warning("Could not locate any files to upload in the directory: {0}.", path);
 
         return;
       }
 
-      Logger.Debug("Processing files in the directory: {0}.", options.Path);
 
-      var photosetName = Path.GetFileName(options.Path.TrimEnd('\\'));
+      Logger.Debug("Processing files in the directory: {0}.", path);
+
+      var photosetName = Path.GetFileName(path.TrimEnd('\\'));
 
       var photoset = Uploader.FindPhotosetByName(photosetName);
       var photosetExists = photoset != null && photoset.Title == photosetName;
@@ -72,8 +90,7 @@ namespace YetAnotherFlickrUploader
       }
       else
       {
-        if (ConsoleHelper.ConfirmYesNo($"Agree to upload {files.Count} files to {(photosetExists ? "the existing" : "a new")} photoset '{photosetName}'?"))
-        {
+
           photosetChanged = true;
 
           #region Upload photos
@@ -97,6 +114,7 @@ namespace YetAnotherFlickrUploader
                 //uploaded twice?
                 throw new Exception($"{title} is already in the list of uploaded files.");
               }
+
               photoIds.Add(photoId);
             }
           }, Settings.BatchSizeForParallelUpload);
@@ -165,7 +183,7 @@ namespace YetAnotherFlickrUploader
             #endregion
           }
         }
-      }
+      
 
       bool updatePermissions = options.ShareWithFamily || options.ShareWithFriends;
 

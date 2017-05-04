@@ -44,8 +44,6 @@ namespace YetAnotherFlickrUploader.Services
 		{
 			var photos = Flickr.PhotosGetNotInSet(new PartialSearchOptions());
 			return photos.FirstOrDefault(x => x.Title == title);
-			//var photos = Flickr.PhotosSearch(new PhotoSearchOptions { UserId = UserId, Text = title });
-			//return photos.FirstOrDefault();
 		}
 
 		public static Photo FindPictureByName(string title)

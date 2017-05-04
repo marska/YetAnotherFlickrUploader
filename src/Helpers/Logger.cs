@@ -64,7 +64,7 @@ namespace YetAnotherFlickrUploader.Helpers
 
 		private static string FormatMessage(string format, params object[] args)
 		{
-			string result = args != null && args.Length > 0 ? string.Format(format, args) : format;
+			var result = args != null && args.Length > 0 ? string.Format(format, args) : format;
 			return result.TrimEnd(' ');
 		}
 	}
